@@ -17,12 +17,16 @@ import se.magnus.microservices.api.product.Product;
 import se.magnus.microservices.api.recommendation.Recommendation;
 import se.magnus.microservices.api.review.Review;
 import se.magnus.microservices.composite.product.services.ProductCompositeIntegration;
+import se.magnus.microservices.util.exceptions.InvalidInputException;
+import se.magnus.microservices.util.exceptions.NotFoundException;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
 class ProductCompositeServiceApplicationTests {
 
-	private static final int PRODUCTID_OK = 123;
+	private static final int PRODUCTID_OK = 1;
+	private static final int PRODUCTID_INVALID = 2;
+	private static final int PRODUCTID_NOT_FOUND = 3;
 	
 	@Autowired
 	WebTestClient client;
@@ -34,10 +38,18 @@ class ProductCompositeServiceApplicationTests {
 	public void setup(){
 		when(integration.getProduct(PRODUCTID_OK))
 		.thenReturn(new Product(PRODUCTID_OK, "name", 123, "mock-serviceAddress"));
+		
 		when(integration.getReviews(PRODUCTID_OK))
 		.thenReturn(Collections.singletonList(new Review(PRODUCTID_OK, 1, "author", "subject", "content", "mock-serviceAddress")));
+		
 		when(integration.getRecommendations(PRODUCTID_OK))
 		.thenReturn(Collections.singletonList(new Recommendation(PRODUCTID_OK, 1, "author", 5, "content", "mock-serviceAddress")));
+
+		when(integration.getProduct(PRODUCTID_INVALID))
+			.thenThrow(new InvalidInputException("INVALID:" + PRODUCTID_INVALID));
+		
+		when(integration.getProduct(PRODUCTID_NOT_FOUND))
+			.thenThrow(new NotFoundException("NOT FOUND:" + PRODUCTID_INVALID));
 	}
 
 	@Test
@@ -58,4 +70,11 @@ class ProductCompositeServiceApplicationTests {
 		;
 	}
 
+	@Test
+	public void productNotFound(){
+		client.get().uri("/product-composite/" + PRODUCTID_NOT_FOUND)
+		.accept(MediaType.APPLICATION_JSON)
+		.exchange()
+		.expectStatus().isNotFound();
+	}
 }
