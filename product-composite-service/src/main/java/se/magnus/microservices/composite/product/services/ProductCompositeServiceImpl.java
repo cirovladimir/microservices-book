@@ -34,12 +34,11 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
     @Override
     public ProductAggregate getProduct(int productId) {
         log.debug("request to get product with id {}", productId);
-        throw new InvalidInputException();
-        // Product product = integration.getProduct(productId);
-        // List<Recommendation> recommendations = integration.getRecommendations(productId);
-        // List<Review> reviews = integration.getReviews(productId);
-        // log.debug("product, review and recommendation service had been called: {} {} {}", product, recommendations, reviews);
-        // return createProductAggregate(product, recommendations, reviews);
+        Product product = integration.getProduct(productId);
+        List<Recommendation> recommendations = integration.getRecommendations(productId);
+        List<Review> reviews = integration.getReviews(productId);
+        log.debug("product, review and recommendation service had been called: {} {} {}", product, recommendations, reviews);
+        return createProductAggregate(product, recommendations, reviews);
     }
 
     private ProductAggregate createProductAggregate(Product product, List<Recommendation> recommendations,
