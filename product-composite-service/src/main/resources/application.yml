@@ -12,3 +12,40 @@ app:
     review-service:
         host: localhost
         port: 7003
+api:
+    common:
+        version: 1.0.0
+        title: Hands On Microservices Book API
+        description: Contains services described in the book Hands On Microservices with Spring Boot and Spring Cloud
+        termsOfServiceUrl: https://policies.google.com/terms?hl=en-US
+        license: Apache License, Version 2.0
+        licenseUrl: https://www.apache.org/licenses/LICENSE-2.0
+        contact:
+            name: cirovladimir
+            email: cirovladimir@gmail.com
+            url: "https://twitter.com/cirovladimir"
+    product-composite:
+        get:
+            description: Returns a composite view of the specified product id
+            notes: |
+                # Normal response
+                If the requested product id is found the method will return information regarding:
+                    - base product information
+                    - reviews
+                    - recommendations
+                    - service adresses (technical information regarding the address of microservices that created the response)
+                
+                # Expected partial and error responses
+                In the following cases, only a partial response will be created (used to simplify testing of error conditions)
+
+                ## Product id 113
+                200 - Ok, but no recommendations will be returned
+                
+                ## Product id 213
+                200 - Ok, but no reviews will be returned
+                
+                ## Product id 13
+                404 - A <b>Not found</b> error will be returned
+                
+                ## Non numerical product id 
+                400 - A <b>Bad request</b> error will be returned
