@@ -12,9 +12,17 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	mapStructVersion = '1.3.0.Final'
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation "org.mapstruct:mapstruct:${mapStructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapStructVersion}"
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
 	implementation project(':api')
 	implementation project(':util')
 
