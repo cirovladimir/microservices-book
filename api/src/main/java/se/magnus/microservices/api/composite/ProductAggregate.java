@@ -5,8 +5,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import se.magnus.microservices.api.recommendation.Recommendation;
-
 public class ProductAggregate {
     private final int productId;
     private final String name;

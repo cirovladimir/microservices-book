@@ -35,6 +35,7 @@ public class ProductRepositoryTest {
         productRepository.save(newEntity);
 
         ProductEntity foundEntity = productRepository.findById(newEntity.getId()).get();
+        log.debug("new entity: {}, foundEntity: {}", newEntity, foundEntity);
         assertEquals(newEntity, foundEntity);
 
         assertEquals(2, productRepository.count());

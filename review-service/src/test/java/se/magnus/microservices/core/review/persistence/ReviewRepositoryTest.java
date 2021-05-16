@@ -36,6 +36,7 @@ public class ReviewRepositoryTest {
 
         ReviewEntity foundReview = reviewRepository.findById(savedReview.getId()).get();
 
+        log.debug("savedReview: {}, foundReview: {}", savedReview, foundReview);
         assertEquals(savedReview, foundReview);
         assertEquals(2, reviewRepository.count());
     }

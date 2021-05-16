@@ -30,6 +30,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getProduct(int productId) {
+        log.debug("A request to get the product with id '{}' has been received.", productId);
         if(productId<1){
             throw new InvalidInputException("Invalid productId: " + productId);
         }
@@ -40,14 +41,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product createProduct(Product body) {
-        ProductEntity productEntity = productMapper.apiToEntity(body);
+    public Product createProduct(Product product) {
+        log.debug("A request to create a product has been received: {} ", product);
+        ProductEntity productEntity = productMapper.apiToEntity(product);
         ProductEntity savedEntity = productRepository.save(productEntity);
         return productMapper.entityToApi(savedEntity);
     }
 
     @Override
     public void deleteProduct(int productId) {
+        log.debug("A request to delete the product with id '{}' has been received", productId);
         if(productId < 1) throw new InvalidInputException("Invalid productId: " + productId);
 
         productRepository.findByProductId(productId).ifPresent(e->productRepository.delete(e));

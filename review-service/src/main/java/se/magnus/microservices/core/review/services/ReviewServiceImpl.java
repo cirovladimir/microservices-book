@@ -1,6 +1,5 @@
 package se.magnus.microservices.core.review.services;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
