@@ -16,7 +16,7 @@ public class ProductAggregate {
     @JsonCreator
     public ProductAggregate(@JsonProperty("productId") int productId, @JsonProperty("name") String name,
             @JsonProperty("weight") int weight,
-            @JsonProperty("recommnedations") List<RecommendationSummary> recommendations,
+            @JsonProperty("recommendations") List<RecommendationSummary> recommendations,
             @JsonProperty("reviews") List<ReviewSummary> reviews,
             @JsonProperty("serviceAddresses") ServiceAddresses serviceAddresses) {
         this.productId = productId;
