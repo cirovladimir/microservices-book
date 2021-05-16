@@ -5,19 +5,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RecommendationSummary {
 
+    private final int productId;
     private final int recommendationId;
     private final String author;
     private final int rate;
+    private String content;
 
     @JsonCreator
-    public RecommendationSummary(@JsonProperty("recommendationId") int recommendationId,
-            @JsonProperty("author") String author, @JsonProperty("rate") int rate) {
+    public RecommendationSummary(@JsonProperty("productId") int productId,
+            @JsonProperty("recommendationId") int recommendationId, @JsonProperty("author") String author,
+            @JsonProperty("rate") int rate, @JsonProperty("content") String content) {
+        this.productId = productId;
         this.recommendationId = recommendationId;
         this.author = author;
         this.rate = rate;
+        this.content = content;
     }
 
-    public int getRecommnedationId() {
+    public int getProductId(){
+        return this.productId;
+    }
+
+    public int getRecommendationId() {
         return this.recommendationId;
     }
 
@@ -29,4 +38,7 @@ public class RecommendationSummary {
         return this.rate;
     }
 
+    public String getContent(){
+        return this.content;
+    }
 }

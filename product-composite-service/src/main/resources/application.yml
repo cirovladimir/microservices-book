@@ -49,3 +49,18 @@ api:
                 
                 ## Non numerical product id 
                 400 - A <b>Bad request</b> error will be returned
+        create:
+            description: Creates a composite product
+            notes: |
+                # Normal response
+                The composite product information posted to the API will be splitted up
+                and stored as separate product-info, recommendation and review entities.
+
+                # Expected error responses
+                1.- If a product with the same product id as specified in the posted information already exists, 
+                an 442 - Unprocessable entity error with a duplicate key error message will be returned.
+        delete:
+            description: Deletes a product composite
+            notes: |
+                # Normal response
+                Entities for product information, recommendation and reviews related to the specified productId will be deleted.

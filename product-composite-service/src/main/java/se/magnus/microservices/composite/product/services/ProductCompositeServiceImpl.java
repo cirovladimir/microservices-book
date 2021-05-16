@@ -37,7 +37,8 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
         Product product = integration.getProduct(productId);
         List<Recommendation> recommendations = integration.getRecommendations(productId);
         List<Review> reviews = integration.getReviews(productId);
-        log.debug("product, review and recommendation service had been called: {} {} {}", product, recommendations, reviews);
+        log.debug("product, review and recommendation service had been called: {} {} {}", product, recommendations,
+                reviews);
         return createProductAggregate(product, recommendations, reviews);
     }
 
@@ -45,20 +46,46 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
             List<Review> reviews) {
 
         List<RecommendationSummary> recommendationSummaries = recommendations.stream().map(recommendation -> {
-            return new RecommendationSummary(recommendation.getRecommendationId(), recommendation.getAuthor(),
-                    recommendation.getRate());
+            return new RecommendationSummary(recommendation.getProductId(), recommendation.getRecommendationId(),
+                    recommendation.getAuthor(), recommendation.getRate(), recommendation.getContent());
         }).collect(Collectors.toList());
         List<ReviewSummary> reviewSummaries = reviews.stream().map(review -> {
-            return new ReviewSummary(review.getReviewId(), review.getAuthor(), review.getSubject());
+            return new ReviewSummary(review.getProductId(), review.getReviewId(), review.getAuthor(),
+                    review.getSubject(), review.getContent());
         }).collect(Collectors.toList());
         String reviewServiceAddress = reviews.stream().findFirst().map(review -> review.getServiceAddress()).orElse("");
         String recommendationServiceAddress = recommendations.stream().findFirst()
                 .map(recommendation -> recommendation.getServiceAddress()).orElse("");
 
-        ServiceAddresses serviceAddresses = new ServiceAddresses(serviceUtil.getServiceAddress(), product.getServiceAddress(), reviewServiceAddress,
-                recommendationServiceAddress);
+        ServiceAddresses serviceAddresses = new ServiceAddresses(serviceUtil.getServiceAddress(),
+                product.getServiceAddress(), reviewServiceAddress, recommendationServiceAddress);
         return new ProductAggregate(product.getProductId(), product.getName(), product.getWeight(),
                 recommendationSummaries, reviewSummaries, serviceAddresses);
+    }
+
+    @Override
+    public ProductAggregate createProduct(ProductAggregate productAggregate) {
+        Product product = new Product(productAggregate.getProductId(), productAggregate.getName(),
+                productAggregate.getWeight(), null);
+        integration.createProduct(product);
+        productAggregate.getRecommendations().stream().forEach(info -> {
+            Recommendation recommendation = new Recommendation(info.getProductId(), info.getRecommendationId(),
+                    info.getAuthor(), info.getRate(), info.getContent(), null);
+            integration.createRecommendation(recommendation);
+        });
+        productAggregate.getReviews().stream().forEach(info -> {
+            Review review = new Review(info.getProductId(), info.getReviewId(), info.getAuthor(), info.getSubject(),
+                    info.getContent(), null);
+            integration.createReview(review);
+        });
+        return getProduct(productAggregate.getProductId());
+    }
+
+    @Override
+    public void deleteProduct(int productId) {
+        integration.deleteProduct(productId);
+        integration.deleteRecommendations(productId);
+        integration.deleteReviews(productId);
     }
 
 }
