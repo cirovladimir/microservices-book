@@ -6,4 +6,3 @@ spring.data.mongodb:
 logging:
     level:
         root: info
-        org.springframework.data.mongodb.core.MongoTemplate: debug

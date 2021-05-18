@@ -1,0 +1,5 @@
+spring.jpa.hibernate.ddl-auto: update
+logging:
+    level:
+        root: info
+        org.springframework.data.mongodb.core.MongoTemplate: debug

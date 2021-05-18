@@ -4,9 +4,6 @@ spring.datasource:
     username: user
     password: pwd
 spring.datasource.hikari.initializationFailTimeout: 60000
-spring.jpa.hibernate.ddl-auto: update
 logging:
     level:
         root: info
-        org.hibernate.SQL: debug
-        org.hibernate.type.descriptor.sql.BasicBinder: trace
