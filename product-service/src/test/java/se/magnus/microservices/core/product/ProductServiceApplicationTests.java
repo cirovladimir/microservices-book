@@ -1,7 +1,7 @@
 package se.magnus.microservices.core.product;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,14 +33,27 @@ class ProductServiceApplicationTests {
 
 	@BeforeEach
 	public void setup() {
-		productRepository.deleteAll();
+		productRepository.deleteAll().block();
 
 		defaultProduct = new Product(1, "name", 1, null);
-		productRepository.save(productMapper.apiToEntity(defaultProduct));
+		productRepository.save(productMapper.apiToEntity(defaultProduct)).block();
 	}
 
 	@Test
 	void contextLoads() {
+	}
+
+	@Test
+	void getProduct(){
+		int productId = defaultProduct.getProductId();
+
+		client.get().uri("/product/" + productId)
+		.accept(MediaType.APPLICATION_JSON)
+		.exchange()
+		.expectStatus().isOk()
+		.expectBody()
+		.jsonPath("$.productId").isEqualTo(defaultProduct.getProductId())
+		.jsonPath("$.name").isEqualTo(defaultProduct.getName());
 	}
 
 	@Test
@@ -51,13 +64,13 @@ class ProductServiceApplicationTests {
 				.header("Content-Type", "application/json").accept(MediaType.APPLICATION_JSON).exchange().expectStatus()
 				.isOk().expectBody().jsonPath("$.productId").isEqualTo(productId);
 
-		assertEquals(2, productRepository.count());
-		assertTrue(productRepository.findByProductId(productId).isPresent());
+		assertEquals(2, productRepository.count().block());
+		assertNotNull(productRepository.findByProductId(productId).block());
 	}
 
 	@Test
 	public void deleteProduct() {
-		assertEquals(1, productRepository.count());
+		assertEquals(1, productRepository.count().block());
 
 		int productId = 1;
 		client
@@ -65,7 +78,7 @@ class ProductServiceApplicationTests {
 		.exchange()
 		.expectStatus().isOk();
 
-		assertEquals(0, productRepository.count());
+		assertEquals(0, productRepository.count().block());
 	}
 
 }

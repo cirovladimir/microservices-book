@@ -18,19 +18,19 @@ public class RecommendationRepositoryTest {
     @BeforeEach
     public void setup(){
         savedRecommendationEntity = new RecommendationEntity(1, 1, "author", 5, "content");
-        recommendationRepository.save(savedRecommendationEntity);
+        recommendationRepository.save(savedRecommendationEntity).block();
 
-        assertEquals(1, recommendationRepository.count());
+        assertEquals(1, recommendationRepository.count().block());
     }
 
     @Test
     public void create(){
         RecommendationEntity newRecommendationEntity = new RecommendationEntity(2, 2, "author", 3, "content");
-        recommendationRepository.save(newRecommendationEntity);
+        recommendationRepository.save(newRecommendationEntity).block();
 
-        RecommendationEntity foundRecommendationEntity = recommendationRepository.findById(newRecommendationEntity.getId()).get();
+        RecommendationEntity foundRecommendationEntity = recommendationRepository.findById(newRecommendationEntity.getId()).block();
 
         assertEquals(newRecommendationEntity, foundRecommendationEntity);
-        assertEquals(2, recommendationRepository.count());
+        assertEquals(2, recommendationRepository.count().block());
     }
 }

@@ -1,10 +1,8 @@
 package se.magnus.microservices.core.recommendation.services;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.web.bind.annotation.RestController;
 
+import reactor.core.publisher.Flux;
 import se.magnus.microservices.api.recommendation.Recommendation;
 import se.magnus.microservices.api.recommendation.RecommendationService;
 import se.magnus.microservices.core.recommendation.persistence.RecommendationEntity;
@@ -26,25 +24,29 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public List<Recommendation> getRecommendations(int productId) {
-        List<RecommendationEntity> foundRecommendations = recommendationRepository.findByProductId(productId);
-
-        return recommendationMapper.toApi(foundRecommendations).stream().map(recommendation -> {
-            recommendation.setServiceAddress(serviceUtil.getServiceAddress());
-            return recommendation;
-        }).collect(Collectors.toList());
+    public Flux<Recommendation> getRecommendations(int productId) {
+        return recommendationRepository.findByProductId(productId)
+        .log()
+        .map(e->recommendationMapper.toApi(e))
+        .map(e->{
+            e.setServiceAddress(serviceUtil.getServiceAddress());
+            return e;
+        });
     }
 
     @Override
     public Recommendation createRecommendation(Recommendation body) {
         RecommendationEntity entity = recommendationMapper.toEntity(body);
-        RecommendationEntity savedEntity = recommendationRepository.save(entity);
-        return recommendationMapper.toApi(savedEntity);
+        return recommendationRepository.save(entity)
+        .log()
+        .map(e->recommendationMapper.toApi(e))
+        .toProcessor()
+        .block();
     }
 
     @Override
     public void deleteRecommendations(int productId) {
-        recommendationRepository.deleteAll(recommendationRepository.findByProductId(productId));
+        recommendationRepository.deleteAll(recommendationRepository.findByProductId(productId)).toProcessor().block();
     }
 
 }

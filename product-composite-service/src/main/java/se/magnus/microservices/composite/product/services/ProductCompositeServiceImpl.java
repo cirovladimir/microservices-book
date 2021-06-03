@@ -1,13 +1,13 @@
 package se.magnus.microservices.composite.product.services;
 
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RestController;
 
+import reactor.core.publisher.Mono;
 import se.magnus.microservices.api.composite.ProductAggregate;
 import se.magnus.microservices.api.composite.ProductCompositeService;
 import se.magnus.microservices.api.composite.RecommendationSummary;
@@ -16,7 +16,6 @@ import se.magnus.microservices.api.composite.ServiceAddresses;
 import se.magnus.microservices.api.product.Product;
 import se.magnus.microservices.api.recommendation.Recommendation;
 import se.magnus.microservices.api.review.Review;
-import se.magnus.microservices.util.exceptions.InvalidInputException;
 import se.magnus.microservices.util.http.ServiceUtil;
 
 @RestController
@@ -32,14 +31,16 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
     }
 
     @Override
-    public ProductAggregate getProduct(int productId) {
+    public Mono<ProductAggregate> getProduct(int productId) {
         log.debug("request to get product with id {}", productId);
-        Product product = integration.getProduct(productId);
-        List<Recommendation> recommendations = integration.getRecommendations(productId);
-        List<Review> reviews = integration.getReviews(productId);
-        log.debug("product, review and recommendation service had been called: {} {} {}", product, recommendations,
-                reviews);
-        return createProductAggregate(product, recommendations, reviews);
+
+        return Mono.zip(values->createProductAggregate((Product)values[0], (List<Recommendation>)values[1], (List<Review>)values[2]),
+            integration.getProduct(productId),
+            integration.getRecommendations(productId).collectList(),
+            integration.getReviews(productId).collectList()
+        ).doOnError(e->{
+            log.warn("Get Product aggregate failed with: {}", e);
+        }).log();
     }
 
     private ProductAggregate createProductAggregate(Product product, List<Recommendation> recommendations,
@@ -64,7 +65,7 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
     }
 
     @Override
-    public ProductAggregate createProduct(ProductAggregate productAggregate) {
+    public Mono<ProductAggregate> createProduct(ProductAggregate productAggregate) {
         Product product = new Product(productAggregate.getProductId(), productAggregate.getName(),
                 productAggregate.getWeight(), null);
         integration.createProduct(product);
@@ -78,7 +79,7 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
                     info.getContent(), null);
             integration.createReview(review);
         });
-        return getProduct(productAggregate.getProductId());
+        return Mono.just(productAggregate);
     }
 
     @Override

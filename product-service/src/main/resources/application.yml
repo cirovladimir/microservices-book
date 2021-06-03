@@ -5,4 +5,4 @@ spring.data.mongodb:
   database: product-db
 logging:
     level:
-        root: info
+        root: debug

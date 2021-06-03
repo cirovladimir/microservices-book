@@ -10,6 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import reactor.core.publisher.Mono;
 
 @Api(description = "REST API for composite product information")
 public interface ProductCompositeService {
@@ -21,7 +22,7 @@ public interface ProductCompositeService {
         @ApiResponse(code = 404, message = "Not Found, the specified id does not exist."),
         @ApiResponse(code = 422, message = "Unprocessable entity, input parameters caused the processing to fail. See response message for more information."),
     })
-    ProductAggregate getProduct(@PathVariable(value = "productId", required = true)int productId);
+    Mono<ProductAggregate> getProduct(@PathVariable(value = "productId", required = true)int productId);
 
     @PostMapping(value = "/product-composite", consumes = "application/json", produces = "application/json")
     @ApiOperation(value = "${api.product-composite.create.description}", notes = "${api.product-composite.create.notes}")
@@ -29,7 +30,7 @@ public interface ProductCompositeService {
         @ApiResponse(code = 400, message = "Bad Request, invalid format of the request. See response message for more information."),
         @ApiResponse(code = 422, message = "Unprocessable entity, input parameters caused the processing to fail. See response message for more information."),
     })
-    ProductAggregate createProduct(@RequestBody ProductAggregate productAggregate);
+    Mono<ProductAggregate> createProduct(@RequestBody ProductAggregate productAggregate);
 
     @DeleteMapping("/product-composite/{productId}")
     @ApiOperation(value = "${api.product-composite.delete.description}", notes = "${api.product-composite.delete.notes}")

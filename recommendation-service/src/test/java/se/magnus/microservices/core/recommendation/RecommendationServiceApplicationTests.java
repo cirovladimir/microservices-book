@@ -32,15 +32,28 @@ class RecommendationServiceApplicationTests {
 
 	@BeforeEach
 	public void setup(){
-		repository.deleteAll();
+		repository.deleteAll().block();
 		defaultRecommendation = new Recommendation(1, 1, "author", 5, "content", null);
-		repository.save(mapper.toEntity(defaultRecommendation));
+		repository.save(mapper.toEntity(defaultRecommendation)).block();
 
-		assertEquals(1, repository.count());
+		assertEquals(1, repository.count().block());
 	}
 
 	@Test
 	void contextLoads() {
+	}
+
+	@Test
+	void getRecommendations(){
+		int productId = defaultRecommendation.getProductId();
+		client.get().uri("/recommendation?productId=" + productId)
+		.accept(MediaType.APPLICATION_JSON)
+		.exchange()
+		.expectStatus().isOk()
+		.expectBody()
+		.jsonPath("$.length()").isEqualTo(1)
+		.jsonPath("$[0].productId").isEqualTo(defaultRecommendation.getProductId())
+		.jsonPath("$[0].recommendationId").isEqualTo(defaultRecommendation.getRecommendationId());
 	}
 
 	@Test
@@ -60,7 +73,7 @@ class RecommendationServiceApplicationTests {
 		.jsonPath("$.recommendationId").isEqualTo(recommendationId)
 		.jsonPath("$.author").isEqualTo("author");
 
-		assertEquals(2, repository.count());
+		assertEquals(2, repository.count().block());
 	}
 
 	@Test
@@ -70,7 +83,7 @@ class RecommendationServiceApplicationTests {
 		.exchange()
 		.expectStatus().isOk();
 
-		assertEquals(0, repository.count());
+		assertEquals(0, repository.count().block());
 	}
 
 }

@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import se.magnus.microservices.api.composite.ProductAggregate;
 import se.magnus.microservices.api.composite.RecommendationSummary;
@@ -42,13 +43,13 @@ class ProductCompositeServiceApplicationTests {
 	@BeforeEach
 	public void setup(){
 		when(integration.getProduct(PRODUCTID_OK))
-		.thenReturn(new Product(PRODUCTID_OK, "name", 123, "mock-serviceAddress"));
+		.thenReturn(Mono.just(new Product(PRODUCTID_OK, "name", 123, "mock-serviceAddress")));
 		
 		when(integration.getReviews(PRODUCTID_OK))
-		.thenReturn(Collections.singletonList(new Review(PRODUCTID_OK, 1, "author", "subject", "content", "mock-serviceAddress")));
+		.thenReturn(Flux.fromIterable(Collections.singletonList(new Review(PRODUCTID_OK, 1, "author", "subject", "content", "mock-serviceAddress"))));
 		
 		when(integration.getRecommendations(PRODUCTID_OK))
-		.thenReturn(Collections.singletonList(new Recommendation(PRODUCTID_OK, 1, "author", 5, "content", "mock-serviceAddress")));
+		.thenReturn(Flux.fromIterable(Collections.singletonList(new Recommendation(PRODUCTID_OK, 1, "author", 5, "content", "mock-serviceAddress"))));
 
 		when(integration.getProduct(PRODUCTID_INVALID))
 			.thenThrow(new InvalidInputException("INVALID:" + PRODUCTID_INVALID));

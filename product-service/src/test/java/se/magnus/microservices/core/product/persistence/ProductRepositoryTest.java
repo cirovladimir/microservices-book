@@ -23,30 +23,32 @@ public class ProductRepositoryTest {
 
     @BeforeEach
     public void setup() {
-        productRepository.deleteAll();
+        log.debug("deleting all product documents from db");
+        productRepository.deleteAll().block();
         ProductEntity productEntity = new ProductEntity(1, "product-1", 1);
-        savedEntity = productRepository.save(productEntity);
+        savedEntity = productRepository.save(productEntity).block();
         assertEquals(productEntity, savedEntity);
+        log.debug("saved default product entity on db: {}", savedEntity);
     }
 
     @Test
     public void create() {
         ProductEntity newEntity = new ProductEntity(2, "product-2", 2);
-        productRepository.save(newEntity);
+        productRepository.save(newEntity).block();
 
-        ProductEntity foundEntity = productRepository.findById(newEntity.getId()).get();
+        ProductEntity foundEntity = productRepository.findById(newEntity.getId()).block();
         log.debug("new entity: {}, foundEntity: {}", newEntity, foundEntity);
         assertEquals(newEntity, foundEntity);
 
-        assertEquals(2, productRepository.count());
+        assertEquals(2, productRepository.count().block());
     }
 
     @Test
     public void update() {
         savedEntity.setName("product-updated");
-        productRepository.save(savedEntity);
+        productRepository.save(savedEntity).block();
 
-        ProductEntity foundEntity = productRepository.findById(savedEntity.getId()).get();
+        ProductEntity foundEntity = productRepository.findById(savedEntity.getId()).block();
 
         assertEquals("product-updated", foundEntity.getName());
     }
@@ -55,24 +57,24 @@ public class ProductRepositoryTest {
     public void duplicateError() {
         ProductEntity duplicateProductEntity = new ProductEntity(savedEntity.getProductId(), "name", 1);
         assertThrows(DuplicateKeyException.class, () -> {
-            productRepository.save(duplicateProductEntity);
+            productRepository.save(duplicateProductEntity).block();
         });
     }
 
     @Test
     public void optimisticLockError(){
-        ProductEntity productEntity1 = productRepository.findById(savedEntity.getId()).get();
-        ProductEntity productEntity2 = productRepository.findById(savedEntity.getId()).get();
+        ProductEntity productEntity1 = productRepository.findById(savedEntity.getId()).block();
+        ProductEntity productEntity2 = productRepository.findById(savedEntity.getId()).block();
 
         productEntity1.setName("name-update-1");
-        productRepository.save(productEntity1);
+        productRepository.save(productEntity1).block();
 
         productEntity2.setName("name-update-2");
         assertThrows(OptimisticLockingFailureException.class, ()-> {
-            productRepository.save(productEntity2);
+            productRepository.save(productEntity2).block();
         });
 
-        ProductEntity foundProductEntity = productRepository.findById(savedEntity.getId()).get();
+        ProductEntity foundProductEntity = productRepository.findById(savedEntity.getId()).block();
             assertEquals(1, foundProductEntity.getVersion());
             assertEquals("name-update-1", foundProductEntity.getName());
     }
